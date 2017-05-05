@@ -39,7 +39,9 @@ Många compose-kommandon tar emot servicenamn som argument, detta kan då anges 
 
 #### 4. Skilland på docker-compose och docker-kommandon
 Docker-compose kan ses som ett lite mer sammanhållet verktyg för att hålla reda på flera containrar och hur de skall köras. För _compose_-kommandon finns det ganska ofta en direkt motsvarighet till ett _docker_-kommando. Och du är inte begränsad till att bara använda compose-kommandon om du använder compose, _vanliga_ docker-kommandon går också bra.
+- Prova att starta en webbserver med `docker run -dit -p 9251:80 httpd:2.4` (ersätt om nödvändigt portnummret `9251` mot något annat)
 - Märker du nån skilland på att använda `docker-compose ps` och `docker ps`
+- Du kan ta bort webbservercontainer genom att stoppa den med `docker stop`-kommandot och sedan använda `docker rm`-kommandot
 
 #### 5a. Definiera en egen service
 Så fort en service finns definierad i [compose-filen](docker-compose.yml) kan du börja göra saker med den med compose-kommandon.
