@@ -34,22 +34,27 @@ Många compose-kommandon tar emot servicenamn som argument, detta kan då anges 
 - Starta dina servicar med `up`-kommandot
 - Prova att stoppa en eller ett par servicar med `stop`
 - Verifiera ditt resultat med `ps`
-- Om allt är igång kan du prova om du får nåt svar från kibana via http://localhost:5601 (ersätt med det portnummer du har i din `.env`-fil)
 - Finns det nån skillnad på att använda `up` respektive `down` jämfört med `start` respektive `stop`?
 
-#### 4. Skilland på docker-compose och docker-kommandon
+#### 4. Verifiera att det kommer loggar till kibana
+- Om allt är igång kan du prova om du får nåt svar från kibana via http://localhost:5601 (ersätt med det portnummer du har i din `.env`-fil)
+- Första gången du startar kibana behöver ett `index pattern` konfigureras
+  - en sida för det bör visas, `logstash-*` föreslås som pattern och det går bra att trycka på `create`-knappen
+- Klicka på discover-fliken, exempelloggar bör synas här (om inte, kan du prova att ställa in tidsfiltret uppe i högra hörnet)
+
+#### 5. Skilland på docker-compose och docker-kommandon
 Docker-compose kan ses som ett lite mer sammanhållet verktyg för att hålla reda på flera containrar och hur de skall köras. För _compose_-kommandon finns det ganska ofta en direkt motsvarighet till ett _docker_-kommando. Och du är inte begränsad till att bara använda compose-kommandon om du använder compose, _vanliga_ docker-kommandon går också bra.
 - Prova att starta en webbserver med `docker run -dit -p 9251:80 httpd:2.4` (ersätt om nödvändigt portnummret `9251` mot något annat)
 - Märker du nån skilland på att använda `docker-compose ps` och `docker ps`
 - Du kan ta bort webbservercontainer genom att stoppa den med `docker stop`-kommandot och sedan använda `docker rm`-kommandot
 
-#### 5a. Definiera en egen service
+#### 6a. Definiera en egen service
 Så fort en service finns definierad i [compose-filen](docker-compose.yml) kan du börja göra saker med den med compose-kommandon.
 - Gör en kopia av logstash-servicen
 - Verifiera med `config`- och/eller `ps`-kommandona
 - I servicens [command](https://docs.docker.com/compose/compose-file/compose-file-v2/#command)-del kan du definiera ett eget kommando, prova att använda `ping` (inte `docker-compose ping`) för att se om du kan få kontakt med elasticsearch
 
-#### 5b. Logga in på en startad container
+#### 6b. Logga in på en startad container
 När allt fungerar som det skall körs kommandot som definierats i _command_-delen tills det är klart sedan stoppas containern. När den sedan staras igen har den inget minne av vad som har gjorts vid tidigare körningar, vilket är ett utmärkt sätt att  garantera att allt som servicen är tänkt att göra finns definierat (och kommer att fungera oavsett var någonstans servicen körs ifrån).
 
 Men det kan i felsökningssyfte vara vettigt att kunna logga in på en startad container för att prova att göra saker manuellt.
@@ -59,7 +64,7 @@ Men det kan i felsökningssyfte vara vettigt att kunna logga in på en startad c
 - Om du nu stannar containern, loggar in (med `exec`) och listar historiken bör du kunna verifiera att containern inte kommer ihåg vad du gjorde sist
 - Hur kan du säkerställa att data som containern skriver blir kvar efter containerns nedtagning?
 
-#### 6. Resursutnyttjande
+#### 7. Resursutnyttjande
 Det kan med vanliga _linux_-kommandon från hosten som kör dina docker-containrar vara svårt att se exakt vilken container som förbrukar mest resurser.
 - Prova att uttyda vad t.ex. `top` (utan `docker-compose` före) säger för något
 - Det finns även ett `docker stats`-kommando som visar startade containerars resursförbrukning
@@ -67,7 +72,7 @@ Det kan med vanliga _linux_-kommandon från hosten som kör dina docker-containr
  - **Tips** `docker-compose ps|grep -v Name|grep -v ^\-|cut -d ' ' -f1` listar containernamnen i ett compose-context
 
 
- #### 7. Loggning
+ #### 8. Loggning
  Om du startar dina containrar med `docker-compose up` utan några argument kommer det som händer i containrarna att ekas ut på skärmen. Detta är sannolikt helt ok om du endast skall ha containrarna startade en begränsad tid. Men i en drift-situation vill du sannolikt dels kunna söka i loggen vid ett senare tillfälle och från en annan session än den som kör docker-compose.
  - Stoppa dina containrar om dom är igång
  - Ta upp dom i _detachat_-läge
@@ -77,7 +82,7 @@ Det kan med vanliga _linux_-kommandon från hosten som kör dina docker-containr
   - **Tips** `docker-compose config --services` listar namnen på dina servicars
 
 
-#### 8. Dockerfile och bygga din egen image
+#### 9. Dockerfile och bygga din egen image
 En container skapas utifrån en _image_. En image kan ses som en mall-maskin innehållandes det mesta som en viss typ av container behöver för att kunna starta. Det skulle t.ex. bli väldigt tidskrävande att behöva installera en viss typ av mjukvara varje gånge en container startar, det är bättre att ha denna förinstallerad i en image. Hittills har vi använt fördefinierade imagar från [Docker Hub](https://hub.docker.com/), ett så kallat publikt registry för docker imagar.
 
 Det går även bra att bygga egna imagar att ha lokalt på hosten som kör docker eller på ett privat registry (t.ex. [artifactory](https://www.jfrog.com/confluence/display/RTF/Docker+Registry)).
@@ -109,7 +114,7 @@ För att kommunicera med containern behöver en portmappning läggas till, ovan 
 - Starta med `up simpleweb`
 - Verifiera att containern fungerar genom att peka din webbläsare mot http://localhost:9250 (ersätt om nödvändigt port till ett lämpligt värde)
 
-#### 9. Lägg till innehåll till din container
+#### 10. Lägg till innehåll till din container
 En container som bara innehåller data som någon annan har tagit fram är sannolikt inte så värst användbar. Det finns två sätt att lägga till egen data på:
 1. Vid bygge av image med `COPY` eller `ADD`
 2. Vid start av container med `VOLUME`
@@ -132,3 +137,30 @@ En container som bara innehåller data som någon annan har tagit fram är sanno
 ##### Funderingar
 - Finns det för och nackdelar med respektive metod?
 - Vad kan vara typiska användningsfall för de olika metoderna?
+
+#### 11. Peka ut plats för loggfiler för logstash
+Syftet med logstash är att omvandla text i ett godtyckligt format till en datastruktur som elasticsearch förstår. Logstash består av tre huvuddelar, `input`, `filter` och `output`. Dessa specificeras i en [konfigurationsfil](https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html):
+
+```
+input {
+  ...
+}
+filter {
+  ...
+}
+output {
+  ...
+}
+```
+
+I inputdelen talar du bland annat om var någonstans logstash hittar loggar. Och för att detta skall fungera behöver loggarna tillgängliggöras för logstashcontainern på något sätt.
+
+Det finns många sätt för logstash att ta emot loggdata, hur detta görs bestäms genom att använda en eller flera [pluginer](https://www.elastic.co/guide/en/logstash/current/input-plugins.html).  
+
+Om en applikation skriver loggar till fil och logstash är installerad i samma container kan `file`-pluginen användas och ingen hänsyn utöver att speca en `PATH` i inputdelen behöver tas.
+
+Om logstash inte kan installeras där applikationen körs kan `file`-pluginen ändå användas om  loggarna skrivas till en delad filarea som hosten som kör logstashcontainern har åtkomst till, i detta fall kan det vara rimligt att använda en _volume_ (vilket görs av logstash-servicen som är definierad i compose-filen).
+
+ - Gör en ny kopia av den ursprungliga logstash-sdervicen i compose-filen
+ - Kopiera demologgarna till en lämplig plats på filsystemet, t.ex. `/tmp/minaloggar`
+   - Lägg till en egen volume-definition i compose-filen som pekar ut denna plats
